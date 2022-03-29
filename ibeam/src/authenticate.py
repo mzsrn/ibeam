@@ -22,11 +22,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 import ibeam
 from ibeam.src import var
 from ibeam.src.two_fa_handlers.two_fa_handler import TwoFaHandler
+from ibeam.src.webhook_sender import WebhookSender
 
 _LOGGER = logging.getLogger('ibeam.' + Path(__file__).stem)
 
 _DRIVER_NAMES = {}
 _FAILED_ATTEMPTS = 0
+
+webhook_sender = WebhookSender
 
 
 def new_chrome_driver(driver_path, name: str = 'default', headless: bool = True):
@@ -203,6 +206,7 @@ def authenticate_gateway(driver_path,
 
             # handle 2FA
             if trigger_id == var.TWO_FA_EL_ID:
+                webhook_sender.send_webhook('false', 'Credentials correct, but Gateway requires two-factor authentication.')
                 _LOGGER.info(f'Credentials correct, but Gateway requires two-factor authentication.')
                 two_fa_code = handle_two_fa(two_fa_handler)
 
@@ -220,6 +224,7 @@ def authenticate_gateway(driver_path,
                     trigger_id = trigger.get_attribute('id')
 
             if trigger_id == var.ERROR_EL_ID:
+                webhook_sender.send_webhook('false', f'Error displayed by the login webpage: {trigger.text}')
                 _LOGGER.error(f'Error displayed by the login webpage: {trigger.text}')
                 save_screenshot(driver, '__failed_attempt')
 

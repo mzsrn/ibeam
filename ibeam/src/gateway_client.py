@@ -17,6 +17,7 @@ from ibeam.src.http_handler import HttpHandler, Status
 from ibeam.src.inputs_handler import InputsHandler
 from ibeam.src.process_utils import find_procs_by_name, start_gateway
 from ibeam.src.two_fa_handlers.two_fa_handler import TwoFaHandler
+from ibeam.src.webhook_sender import WebhookSender
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -25,7 +26,7 @@ from ibeam import config
 config.initialize()
 
 _LOGGER = logging.getLogger('ibeam.' + Path(__file__).stem)
-
+webhook_sender = WebhookSender
 
 class GatewayClient():
 
@@ -143,6 +144,7 @@ class GatewayClient():
             if shutdown:
                 return False, True
             if not success:
+                webhook_sender.send_webhook('false', 'Authentication process failed')
                 return False, False
             # self._try_request(self.base_url + _ROUTE_VALIDATE, False, max_attempts=REQUEST_RETRIES)
 

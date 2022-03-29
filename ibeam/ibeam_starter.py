@@ -16,6 +16,7 @@ from ibeam.src.gateway_client import GatewayClient
 from ibeam.src.http_handler import HttpHandler
 from ibeam.src import var, two_fa_selector, logs
 from ibeam.src.inputs_handler import InputsHandler
+from ibeam.src.webhook_sender import WebhookSender
 
 _LOGGER = logging.getLogger('ibeam')
 
@@ -62,6 +63,7 @@ if __name__ == '__main__':
                            gateway_dir=gateway_dir,
                            driver_path=driver_path)
 
+    webhook_sender = WebhookSender
     _LOGGER.debug(f'{var.all_variables}')
 
     if args.start:
@@ -93,6 +95,7 @@ if __name__ == '__main__':
     else:
         success, shutdown = client.start_and_authenticate()
         if success:
+            webhook_sender.send_webhook('true', 'Gateway running and authenticated.')
             _LOGGER.info('Gateway running and authenticated.')
 
         if shutdown:
